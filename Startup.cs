@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
+//react kýsmý için nuget ekledikten sonra ekliyoruz.
+using Microsoft.AspNetCore.Http;
+using JavaScriptEngineSwitcher.V8;
+using JavaScriptEngineSwitcher.Extensions.MsDependencyInjection;
+using React.AspNet;
 
 namespace WebApi
 {
@@ -26,6 +27,13 @@ namespace WebApi
         //servis kontrolleri eklendi.appsettings.jsondaki eklentilerin devamý.
         public void ConfigureServices(IServiceCollection services)
         {
+            //react kullanabilmek için ekledik.
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddReact();
+
+            services.AddJsEngineSwitcher(options => options.DefaultEngineName = V8JsEngine.EngineName)
+                .AddV8();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
@@ -59,6 +67,14 @@ namespace WebApi
             }
 
             app.UseHttpsRedirection();
+
+
+            app.UseReact(config =>
+            {
+
+            });
+
+
             app.UseStaticFiles();
 
             app.UseRouting();
